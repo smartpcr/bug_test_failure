@@ -19,6 +19,7 @@ namespace BugAnalysis.Models
         public static Regex buildNumberRegex = new Regex(@"Build Number:\s+([^\s]+)", RegexOptions.Compiled);
         public static Regex aeoDeviceUriRegex = new Regex(@"AEODeviceARMResourceUri:\s+([^\s]+)", RegexOptions.Compiled);
         public static string updateTestRegex = "RP: Update";
+        public static string downloadTestRegex = "RP: Download"; // note: download failure are in log share
         public static Regex testSplit = new Regex(@"Test:\s+([^\s]+)", RegexOptions.Compiled);
         public static Regex exceptionRegex = new Regex(@"Exception:\s+([^\n]+)", RegexOptions.Compiled);
         public static Regex buildIdRegex = new Regex(@"buildId=(\d+)", RegexOptions.Compiled);

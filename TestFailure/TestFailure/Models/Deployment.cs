@@ -107,7 +107,8 @@ namespace BugAnalysis.Models
 			deployment.TestFailures = new List<TestFailure>();
 			var rpIndex = envContent.IndexOf(RegexPatterns.updateTestRegex, StringComparison.OrdinalIgnoreCase);
 			if (rpIndex > 0)
-			{
+            {
+                var testProvider = "Update";
 				var rpContent = envContent.Substring(rpIndex + RegexPatterns.updateTestRegex.Length).Trim();
 				var suiteTestIndex = rpContent.IndexOf("Suite: Test", StringComparison.OrdinalIgnoreCase);
 				if (suiteTestIndex >= 0)
@@ -122,7 +123,7 @@ namespace BugAnalysis.Models
 					var testCase = testContents[k];
 					k++;
 					var testContent = testContents[k];
-					var testFailure = TestFailure.ParseTestFailure(testCase, testContent);
+					var testFailure = TestFailure.ParseTestFailure(testProvider, testCase, testContent);
 					deployment.TestFailures.Add(testFailure);
 				}
 			}
@@ -134,7 +135,7 @@ namespace BugAnalysis.Models
 				{
 					var buildId = int.Parse(buildIdMatch.Groups[1].Value);
 					var buildPipeline = new BuildPipeline(buildId);
-					var testFailures = await buildPipeline.GetTestFailures(cancel);
+					var testFailures = await buildPipeline.GetTestFailures(deployment, cancel);
 					deployment.TestFailures = testFailures;
 				}
 			}

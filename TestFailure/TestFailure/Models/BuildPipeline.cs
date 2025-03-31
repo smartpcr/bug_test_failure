@@ -26,7 +26,7 @@ namespace BugAnalysis.Models
             this.buildId = buildId;
         }
 
-        public async Task<List<TestFailure>> GetTestFailures(CancellationToken cancel)
+        public async Task<List<TestFailure>> GetTestFailures(Deployment deployment, CancellationToken cancel)
         {
             var pat = Ado.GetPat();
             var connection = new VssConnection(new Uri(Ado.AdoUrl), new VssBasicCredential(string.Empty, pat));
@@ -75,8 +75,14 @@ namespace BugAnalysis.Models
 									TestProvider = t.TestProvider,
 									TestCase = t.Suite,
 									Error = t.ErrorMessages?.FirstOrDefault(),
-									IsTimeout = t.TimedOut
+									IsTimeout = t.TimedOut,
 								}).ToList();
+                            var downloadTestFailures = testFailures.Where(t => t.TestProvider == "Download").ToList();
+                            if (downloadTestFailures.Any())
+                            {
+                                DownloadTestFailure.InferTestFailureReason(deployment.LogShare, downloadTestFailures);
+                            }
+
 							return testFailures;
 						}
 
