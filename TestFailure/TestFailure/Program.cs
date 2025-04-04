@@ -8,7 +8,7 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var bug = new Bug(31871479);
+        var bug = new Bug(32150896);
         Console.WriteLine($"Evaluating bug {bug.BugId}...");
         var reproSteps = await bug.DownloadReproSteps();
         var deployments = await Deployment.ParseDeployments(reproSteps);

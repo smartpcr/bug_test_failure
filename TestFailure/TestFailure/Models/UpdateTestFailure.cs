@@ -39,7 +39,24 @@ namespace BugAnalysis.Models
 
             if (errorMessage.IndexOf("Action plan failed when trying to set override update configuration value", StringComparison.Ordinal) >= 0)
             {
-                return UpdateTestFailureReason.EceError;
+                return UpdateTestFailureReason.FailedUpdateConfigValueInActionPlan;
+            }
+
+            if (errorMessage.IndexOf("WebException.Status: ConnectFailure", StringComparison.Ordinal) >= 0 &&
+                errorMessage.IndexOf("providers/Microsoft.Update.Admin/updateLocations", StringComparison.Ordinal) >= 0)
+            {
+                return UpdateTestFailureReason.FailedToGetUpdateLocations;
+            }
+
+            if (errorMessage.IndexOf("WebException.Status: ConnectFailure", StringComparison.Ordinal) >= 0 &&
+                errorMessage.IndexOf(":4900/featureFlag", StringComparison.Ordinal) >= 0)
+            {
+                return UpdateTestFailureReason.FailedToGetFeatureFlags;
+            }
+
+            if (errorMessage.IndexOf("Unable to connect to the remote server", StringComparison.Ordinal) >= 0)
+            {
+                return UpdateTestFailureReason.FailedToConnectToUpdateService;
             }
 
             return UpdateTestFailureReason.Unknown;
@@ -53,6 +70,10 @@ namespace BugAnalysis.Models
         HealthCheckFailed,
         GatewayTimeout,
         AuthorizationError,
-        EceError
+        EceError,
+        FailedToConnectToUpdateService,
+        FailedToGetUpdateLocations,
+        FailedToGetFeatureFlags,
+        FailedUpdateConfigValueInActionPlan
     }
 }
