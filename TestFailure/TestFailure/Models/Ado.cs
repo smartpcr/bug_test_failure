@@ -12,6 +12,7 @@ namespace BugAnalysis.Models
         public const string AdoUrl = "https://dev.azure.com/" + Ado.Account;
         public const string Project = "One";
         public const string ReproStepsField = "Microsoft.VSTS.TCM.ReproSteps";
+        public const string SystemInfoField = "Microsoft.VSTS.TCM.SystemInfo";
 
         public static string GetPat()
         {

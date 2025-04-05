@@ -10,18 +10,29 @@ namespace BugAnalysis.Models
 
     public static class RegexPatterns
     {
-        public static Regex environmentSplit = new Regex(@"(?=Environment:\s+\w+\r?\nIP:\s+[\.\d]+)", RegexOptions.Compiled);
-        public static Regex environmentRegex = new Regex(@"Environment:\s+(\w+)", RegexOptions.Compiled);
-        public static Regex ipRegex = new Regex(@"IP:\s+([\.\d]+)", RegexOptions.Compiled);
-        public static Regex logShareRegex = new Regex(@"Log Share:\s+([^\n]+)", RegexOptions.Compiled);
-        public static Regex pipelineLinkRegex = new Regex(@"Pipeline Link:\s+([^\n]+)", RegexOptions.Compiled);
-        public static Regex dateRegex = new Regex(@"Date:\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})", RegexOptions.Compiled);
-        public static Regex buildNumberRegex = new Regex(@"Build Number:\s+([^\s]+)", RegexOptions.Compiled);
-        public static Regex aeoDeviceUriRegex = new Regex(@"AEODeviceARMResourceUri:\s+([^\s]+)", RegexOptions.Compiled);
-        public static string updateTestRegex = "RP: Update";
+        public static readonly Regex EnvironmentSplit = new Regex(
+            @"(?=(?:Environment:\s+\w+\r?\nIP:\s+[\.\d]+|Environment Details:\s*\r?\n\s*FQDN:\s+[\w\.\-]+))",
+            RegexOptions.Compiled
+        );
+
+        public static readonly Regex EnvironmentRegex = new Regex(@"Environment(?:\s+Name)?\s*:\s*(\w+)", RegexOptions.Compiled);
+
+        public static readonly Regex IpRegex = new Regex(@"(?:DVM\s+or\s+Host\s+)?IP:\s+([\.\d]+)", RegexOptions.Compiled);
+
+        public static readonly Regex LogShareRegex = new Regex(@"(?:SMB|Log)\s+Share:\s+([^\n]+)", RegexOptions.Compiled);
+
+        public static readonly Regex PipelineLinkRegex = new Regex(@"(?:Pipeline Link|CI Job Output):\s+([^\n]+)", RegexOptions.Compiled);
+
+        public static readonly Regex DateRegex = new Regex(@"(?:Retrieved\s+)?Date:\s+(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2})", RegexOptions.Compiled);
+
+        public static readonly Regex BuildNumberRegex = new Regex(@"Build Number:\s+([^\s]+)", RegexOptions.Compiled);
+
+        public static readonly Regex AeoDeviceUriRegex = new Regex(@"AEODeviceARMResourceUri:\s+([^\s]+)", RegexOptions.Compiled);
+
+        public const string UpdateTestRegex = "RP: Update";
         public static string downloadTestRegex = "RP: Download"; // note: download failure are in log share
-        public static Regex testSplit = new Regex(@"Test:\s+([^\s]+)", RegexOptions.Compiled);
-        public static Regex exceptionRegex = new Regex(@"Exception:\s+([^\n]+)", RegexOptions.Compiled);
-        public static Regex buildIdRegex = new Regex(@"buildId=(\d+)", RegexOptions.Compiled);
+        public static readonly Regex TestSplit = new Regex(@"Test:\s+([^\s]+)", RegexOptions.Compiled);
+        public static readonly Regex ExceptionRegex = new Regex(@"Exception:\s+([^\n]+)", RegexOptions.Compiled);
+        public static readonly Regex BuildIdRegex = new Regex(@"buildId=(\d+)", RegexOptions.Compiled);
     }
 }

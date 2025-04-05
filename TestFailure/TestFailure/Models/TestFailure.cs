@@ -21,7 +21,7 @@ namespace BugAnalysis.Models
             testFailure.TestProvider = testProvider;
             testFailure.TestCase = testCase;
 
-            var exMatch = RegexPatterns.exceptionRegex.Match(testContent);
+            var exMatch = RegexPatterns.ExceptionRegex.Match(testContent);
             if (exMatch.Success)
             {
                 var exceptionMessage = exMatch.Groups[1].Value;

@@ -8,10 +8,28 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var bug = new Bug(32150896);
+        var bug = new Bug(32151219);
         Console.WriteLine($"Evaluating bug {bug.BugId}...");
+        await PrintWorkItemFieldNames(bug.BugId);
+
+        var deployments = new List<Deployment>();
         var reproSteps = await bug.DownloadReproSteps();
-        var deployments = await Deployment.ParseDeployments(reproSteps);
+        var systemInfo = await bug.DownloadSystemInfo();
+        if (!string.IsNullOrEmpty(reproSteps))
+        {
+            deployments = await Deployment.ParseDeployments(reproSteps);
+        }
+
+        if (!deployments.Any())
+        {
+            deployments = await Deployment.ParseDeployments(systemInfo);
+        }
+        else
+        {
+            Console.WriteLine("No repro steps or system info found.");
+            return;
+        }
+
         Console.WriteLine($"total deployments: {deployments.Count}");
 
         // filter out deployments by test provider: Download, Update
@@ -52,5 +70,17 @@ public class Program
         table.Write();
 
         Console.WriteLine("Done!");
+    }
+
+    private static async Task PrintWorkItemFieldNames(int bugId)
+    {
+        // var bug = new Bug(31298515);
+        var bug = new Bug(32151219);
+        var results = await bug.FindFieldContaining("s46r07b4");
+        foreach (var result in results)
+        {
+            Console.WriteLine($"Field Name: {result.fieldName}");
+            Console.WriteLine($"Field Content: {result.fieldContent}");
+        }
     }
 }

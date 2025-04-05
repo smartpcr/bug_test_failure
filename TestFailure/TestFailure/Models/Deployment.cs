@@ -12,14 +12,14 @@ namespace BugAnalysis.Models
 
 	public class Deployment
     {
-        public string Environment { get; set; }
-        public string IPAddress { get; set; }
-        public string LogShare { get; set; }
-        public string PipelineLink { get; set; }
+        public string? Environment { get; set; }
+        public string? IPAddress { get; set; }
+        public string? LogShare { get; set; }
+        public string? PipelineLink { get; set; }
         public DateTime Date { get; set; }
         public BuildNumber BuildNumber { get; set; }
-        public string AeoDeviceUri { get; set; }
-        public List<TestFailure> TestFailures { get; set; }
+        public string? AeoDeviceUri { get; set; }
+        public List<TestFailure>? TestFailures { get; set; }
 
         public static async Task<List<Deployment>> ParseDeployments(string outputContent)
         {
@@ -29,7 +29,7 @@ namespace BugAnalysis.Models
 			        new[] { '\n' },
 			        StringSplitOptions.RemoveEmptyEntries)
 		        .Where(line => !string.IsNullOrWhiteSpace(line)));
-	        var environmentContents = RegexPatterns.environmentSplit.Split(outputContent);
+	        var environmentContents = RegexPatterns.EnvironmentSplit.Split(outputContent);
 	        var environmentContentList = environmentContents.Select(ec => ec.Trim()).Where(ec => !string.IsNullOrEmpty(ec)).ToList();
 
 	        var deployments = new ConcurrentBag<Deployment>();
@@ -54,36 +54,45 @@ namespace BugAnalysis.Models
         public static async Task<Deployment> ParseDeployment(string envContent, CancellationToken cancel)
         {
 			var deployment = new Deployment();
-			var envNameMatch = RegexPatterns.environmentRegex.Match(envContent);
+			var envNameMatch = RegexPatterns.EnvironmentRegex.Match(envContent);
 			if (envNameMatch.Success)
 			{
 				deployment.Environment = envNameMatch.Groups[1].Value;
 			}
-			var ipMatch = RegexPatterns.ipRegex.Match(envContent);
+			var ipMatch = RegexPatterns.IpRegex.Match(envContent);
 			if (ipMatch.Success)
 			{
 				deployment.IPAddress = ipMatch.Groups[1].Value;
 			}
 
-			var logShareMatch = RegexPatterns.logShareRegex.Match(envContent);
+			var logShareMatch = RegexPatterns.LogShareRegex.Match(envContent);
 			if (logShareMatch.Success)
 			{
 				deployment.LogShare = logShareMatch.Groups[1].Value;
 			}
 
-			var pipelineLinkMatch = RegexPatterns.pipelineLinkRegex.Match(envContent);
+			var pipelineLinkMatch = RegexPatterns.PipelineLinkRegex.Match(envContent);
 			if (pipelineLinkMatch.Success)
 			{
 				deployment.PipelineLink = pipelineLinkMatch.Groups[1].Value;
 			}
 
-			var dateMatch = RegexPatterns.dateRegex.Match(envContent);
+			var dateMatch = RegexPatterns.DateRegex.Match(envContent);
 			if (dateMatch.Success)
 			{
-				deployment.Date = DateTime.ParseExact(dateMatch.Groups[1].Value, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                string[] formats = {
+                    "yyyy-MM-dd HH:mm:ss",         // For "Date: 2025-04-03 07:27:21"
+                    "yyyy-MM-ddTHH:mm:ss"   // For "Retrieved Date: 2025-04-03T07:27:21.2086756Z"
+                };
+                deployment.Date = DateTime.ParseExact(
+                    dateMatch.Groups[1].Value,
+                    formats,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal
+                );
 			}
 
-			var buildNumberMatch = RegexPatterns.buildNumberRegex.Match(envContent);
+			var buildNumberMatch = RegexPatterns.BuildNumberRegex.Match(envContent);
 			if (buildNumberMatch.Success)
 			{
 				var buildString = buildNumberMatch.Groups[1].Value.Trim();
@@ -98,24 +107,24 @@ namespace BugAnalysis.Models
 				}
 			}
 
-			var aeoDeviceUriMatch = RegexPatterns.aeoDeviceUriRegex.Match(envContent);
+			var aeoDeviceUriMatch = RegexPatterns.AeoDeviceUriRegex.Match(envContent);
 			if (aeoDeviceUriMatch.Success)
 			{
 				deployment.AeoDeviceUri = aeoDeviceUriMatch.Groups[1].Value;
 			}
 
 			deployment.TestFailures = new List<TestFailure>();
-			var rpIndex = envContent.IndexOf(RegexPatterns.updateTestRegex, StringComparison.OrdinalIgnoreCase);
+			var rpIndex = envContent.IndexOf(RegexPatterns.UpdateTestRegex, StringComparison.OrdinalIgnoreCase);
 			if (rpIndex > 0)
             {
                 var testProvider = "Update";
-				var rpContent = envContent.Substring(rpIndex + RegexPatterns.updateTestRegex.Length).Trim();
+				var rpContent = envContent.Substring(rpIndex + RegexPatterns.UpdateTestRegex.Length).Trim();
 				var suiteTestIndex = rpContent.IndexOf("Suite: Test", StringComparison.OrdinalIgnoreCase);
 				if (suiteTestIndex >= 0)
 				{
 					rpContent = rpContent.Substring(suiteTestIndex + "Suite: Test".Length).Trim();
 				}
-				var testContents = RegexPatterns.testSplit.Split(rpContent)
+				var testContents = RegexPatterns.TestSplit.Split(rpContent)
 					.Select(t => t.Trim())
 					.Where(t => !string.IsNullOrEmpty(t)).ToList();
 				for (var k = 0; k < testContents.Count; k++)
@@ -130,7 +139,7 @@ namespace BugAnalysis.Models
 
 			if (deployment.TestFailures.Count == 0 && !string.IsNullOrEmpty(deployment.PipelineLink))
 			{
-				var buildIdMatch = RegexPatterns.buildIdRegex.Match(deployment.PipelineLink);
+				var buildIdMatch = RegexPatterns.BuildIdRegex.Match(deployment.PipelineLink);
 				if (buildIdMatch.Success)
 				{
 					var buildId = int.Parse(buildIdMatch.Groups[1].Value);
